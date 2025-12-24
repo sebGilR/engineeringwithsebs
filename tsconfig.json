@@ -1,0 +1,20 @@
+{
+  "extends": "next/tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "strict": true,
+    "noImplicitReturns": true,
+    "moduleResolution": "Bundler"
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.mjs",
+    "**/*.cjs"
+  ],
+  "exclude": ["node_modules"]
+}

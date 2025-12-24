@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+
+* {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f8f7f4;
+  color: #121212;
+  margin: 0;
+  width: 100%;
+  min-height: 100vh;
+}
+
+main {
+  width: 100%;
+}
+
+.prose a {
+  text-underline-offset: 4px;
+}

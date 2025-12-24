@@ -48,9 +48,9 @@ module.exports = {
 
       // --- Design tokens (typography) ---
       fontFamily: {
-        display: ['"Fraunces"', 'ui-serif', 'Georgia', 'serif'],
+        display: ['var(--font-display)', 'ui-serif', 'Georgia', 'serif'],
         sans: [
-          '"Inter"',
+          'var(--font-sans)',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
@@ -58,7 +58,7 @@ module.exports = {
           'sans-serif',
         ],
         mono: [
-          '"IBM Plex Mono"',
+          'var(--font-mono)',
           'ui-monospace',
           'SFMono-Regular',
           'Menlo',

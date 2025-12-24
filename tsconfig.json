@@ -9,12 +9,6 @@
     "noImplicitReturns": true,
     "moduleResolution": "Bundler"
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.mjs",
-    "**/*.cjs"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.cjs"],
   "exclude": ["node_modules"]
 }

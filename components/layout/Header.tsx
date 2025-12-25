@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Container } from './Container';
+import { X, Linkedin, Instagram } from 'lucide-react';
 
 export function Header() {
   return (
@@ -13,19 +14,34 @@ export function Header() {
             Engineering with Sebs
           </Link>
 
-          <div className="flex items-center gap-6">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-text-2 hover:text-text-1 transition-colors"
+          <div className="flex items-center gap-4">
+            <a
+              href="https://twitter.com/yourusername"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-2 hover:text-accent-1 transition-colors"
+              aria-label="X (Twitter)"
             >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="px-4 py-2 bg-accent-1 text-white text-sm font-medium rounded-md hover:bg-opacity-90 transition-colors"
+              <X className="w-5 h-5" />
+            </a>
+            <a
+              href="https://linkedin.com/in/yourusername"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-2 hover:text-accent-1 transition-colors"
+              aria-label="LinkedIn"
             >
-              Sign Up
-            </Link>
+              <Linkedin className="w-5 h-5" />
+            </a>
+            <a
+              href="https://instagram.com/yourusername"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-2 hover:text-accent-1 transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram className="w-5 h-5" />
+            </a>
           </div>
         </nav>
       </Container>

@@ -13,18 +13,18 @@ export function Header() {
             Engineering with Sebs
           </Link>
 
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6">
             <Link
-              href="/"
+              href="/login"
               className="text-sm font-medium text-text-2 hover:text-text-1 transition-colors"
             >
-              Home
+              Sign In
             </Link>
             <Link
-              href="/dashboard"
-              className="text-sm font-medium text-text-2 hover:text-text-1 transition-colors"
+              href="/signup"
+              className="px-4 py-2 bg-accent-1 text-white text-sm font-medium rounded-md hover:bg-opacity-90 transition-colors"
             >
-              Dashboard
+              Sign Up
             </Link>
           </div>
         </nav>

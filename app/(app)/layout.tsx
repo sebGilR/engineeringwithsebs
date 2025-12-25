@@ -1,12 +1,19 @@
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
+import { BlogProvider } from '@/lib/contexts/BlogContext';
+
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      {/* Add dashboard layout components here, e.g., sidebar */}
-      <main>{children}</main>
-    </div>
+    <BlogProvider>
+      <div className="flex min-h-screen bg-surface-0">
+        <DashboardSidebar />
+        <main className="flex-1 p-8">
+          {children}
+        </main>
+      </div>
+    </BlogProvider>
   );
 }

@@ -26,18 +26,27 @@ export async function fetchFromBaasAPI(
     defaultHeaders['Authorization'] = `Bearer ${accessToken}`;
   }
 
+  const requestBody = body ? JSON.stringify(body) : null;
+
+  // Debug logging
+  console.log('BaaS API Request:', {
+    url: `${BAAS_API_URL}${path}`,
+    method,
+    body: requestBody,
+  });
+
   const response = await fetch(`${BAAS_API_URL}${path}`, {
     method,
     headers: {
       ...defaultHeaders,
       ...headers,
     },
-    body: body ? JSON.stringify(body) : null,
+    body: requestBody,
   });
 
   if (!response.ok) {
-    // TODO: Handle errors more gracefully
-    console.error('API Error:', await response.text());
+    const errorText = await response.text();
+    console.error('API Error:', errorText);
     throw new Error(`BaaS API request failed: ${response.statusText}`);
   }
 

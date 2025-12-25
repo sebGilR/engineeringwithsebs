@@ -5,14 +5,22 @@ import Link from 'next/link';
 import { use } from 'react';
 import { toast } from 'sonner';
 import type { Post, PostStatus } from '@/lib/types/post';
+import { TiptapEditor } from '@/components/editor/TiptapEditor';
 
-export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditPostPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const [post, setPost] = useState<Post | null>(null);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [excerpt, setExcerpt] = useState('');
-  const [content, setContent] = useState('');
+  const [contentJson, setContentJson] = useState<Record<string, any> | null>(
+    null
+  );
   const [status, setStatus] = useState<PostStatus>('draft');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,8 +51,17 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         setPost(postData);
         setTitle(postData.attributes.title);
         setSlug(postData.attributes.slug);
+        setSlugManuallyEdited(true); // Existing posts have their slug set
         setExcerpt(postData.attributes.excerpt || '');
-        setContent(postData.attributes.content || '');
+
+        // Use content_json if available, otherwise create empty editor state
+        setContentJson(
+          postData.attributes.content_json || {
+            type: 'doc',
+            content: [],
+          }
+        );
+
         setStatus(postData.attributes.status);
       } catch (err: any) {
         console.error('Error fetching post:', err);
@@ -64,11 +81,12 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         title !== post.attributes.title ||
         slug !== post.attributes.slug ||
         excerpt !== (post.attributes.excerpt || '') ||
-        content !== (post.attributes.content || '');
+        JSON.stringify(contentJson) !==
+          JSON.stringify(post.attributes.content_json || { type: 'doc', content: [] });
 
       setHasUnsavedChanges(hasChanges);
     }
-  }, [title, slug, excerpt, content, post, loading]);
+  }, [title, slug, excerpt, contentJson, post, loading]);
 
   // Autosave effect
   useEffect(() => {
@@ -87,7 +105,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         clearTimeout(autosaveTimerRef.current);
       }
     };
-  }, [hasUnsavedChanges, title, slug, excerpt, content, saving]);
+  }, [hasUnsavedChanges, title, slug, excerpt, contentJson, saving]);
 
   // Warn on unsaved changes
   useEffect(() => {
@@ -102,6 +120,26 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
+  const generateSlug = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    // Auto-generate slug only if it hasn't been manually edited
+    if (!slugManuallyEdited && newTitle) {
+      setSlug(generateSlug(newTitle));
+    }
+  };
+
+  const handleSlugChange = (newSlug: string) => {
+    setSlug(newSlug);
+    setSlugManuallyEdited(true);
+  };
+
   const handleAutosave = async () => {
     try {
       const response = await fetch(`/api/posts/${id}`, {
@@ -113,7 +151,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           title,
           slug,
           excerpt,
-          content,
+          content_json: contentJson,
         }),
       });
 
@@ -140,7 +178,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           title,
           slug,
           excerpt,
-          content,
+          content_json: contentJson,
         }),
       });
 
@@ -181,7 +219,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             title,
             slug,
             excerpt,
-            content,
+            content_json: contentJson,
           }),
         });
 
@@ -337,7 +375,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="Post title"
             className="w-full text-3xl font-display font-semibold text-text-1 placeholder-text-3 bg-transparent border-none focus:outline-none"
           />
@@ -352,7 +390,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             <input
               type="text"
               value={slug}
-              onChange={(e) => setSlug(e.target.value)}
+              onChange={(e) => handleSlugChange(e.target.value)}
               className="w-full px-4 py-2 bg-surface-0 border border-border-1 rounded-md text-text-1 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-accent-1 focus:border-transparent"
             />
           </div>
@@ -371,20 +409,11 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           </div>
         </div>
 
-        {/* Content Editor Placeholder */}
+        {/* Content Editor */}
         <div className="p-6">
-          <div className="mb-4 p-4 bg-accent-2 border border-accent-1 rounded-md">
-            <p className="text-sm text-accent-1">
-              <strong>Note:</strong> The Tiptap rich text editor will be integrated in Phase 3.
-              For now, you can use this basic textarea.
-            </p>
-          </div>
-
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={20}
-            className="w-full px-4 py-3 bg-surface-0 border border-border-1 rounded-md text-text-1 placeholder-text-3 focus:outline-none focus:ring-2 focus:ring-accent-1 focus:border-transparent resize-y font-mono text-sm"
+          <TiptapEditor
+            content={contentJson}
+            onChange={setContentJson}
             placeholder="Start writing your post content here..."
           />
         </div>

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { fetchFromBaasAPI } from '@/lib/server/api';
 import { PostResponse } from '@/lib/types/post';
 
@@ -85,6 +86,17 @@ export default async function PostPage({ params }: PageProps) {
 
   return (
     <article className="mx-auto max-w-4xl px-4 py-8">
+      {/* Breadcrumb Navigation */}
+      <nav className="mb-6">
+        <Link
+          href="/"
+          className="text-sm text-text-3 hover:text-text-1 transition-colors inline-flex items-center gap-1"
+        >
+          <span>←</span>
+          <span>Back to Home</span>
+        </Link>
+      </nav>
+
       {/* Article Header */}
       <header className="mb-8 border-b pb-8">
         <h1 className="mb-4 text-4xl font-bold tracking-tight">{title}</h1>

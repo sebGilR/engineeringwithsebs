@@ -11,6 +11,7 @@ export default function NewPostPage() {
   const { blog, loading: blogLoading } = useBlog();
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [excerpt, setExcerpt] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,9 +26,15 @@ export default function NewPostPage() {
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
-    if (!slug) {
+    // Auto-generate slug only if it hasn't been manually edited
+    if (!slugManuallyEdited && newTitle) {
       setSlug(generateSlug(newTitle));
     }
+  };
+
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSlug(e.target.value);
+    setSlugManuallyEdited(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +58,10 @@ export default function NewPostPage() {
           title,
           slug,
           excerpt: excerpt || undefined,
-          content: '',
+          content_json: {
+            type: 'doc',
+            content: [],
+          },
           status: 'draft',
           blog_id: blog.id,
         }),
@@ -123,7 +133,7 @@ export default function NewPostPage() {
               id="slug"
               type="text"
               value={slug}
-              onChange={(e) => setSlug(e.target.value)}
+              onChange={handleSlugChange}
               required
               className="w-full px-4 py-3 bg-surface-0 border border-border-1 rounded-md text-text-1 placeholder-text-3 focus:outline-none focus:ring-2 focus:ring-accent-1 focus:border-transparent transition-all font-mono text-sm"
               placeholder="url-friendly-slug"

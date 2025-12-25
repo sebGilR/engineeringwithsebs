@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { useBlog } from '@/lib/contexts/BlogContext';
 
 export default function NewPostPage() {
@@ -66,10 +67,13 @@ export default function NewPostPage() {
       }
 
       const data = await response.json();
+      toast.success('Post created successfully');
       router.push(`/dashboard/posts/${data.data.id}/edit`);
     } catch (err: any) {
       console.error('Error creating post:', err);
-      setError(err.message || 'Failed to create post. Please try again.');
+      const errorMessage = err.message || 'Failed to create post. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

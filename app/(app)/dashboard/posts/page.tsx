@@ -114,7 +114,7 @@ export default function PostsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredPosts.map((post) => (
+          {posts.map((post) => (
             <Link
               key={post.id}
               href={`/dashboard/posts/${post.id}/edit`}

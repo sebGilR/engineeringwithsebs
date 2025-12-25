@@ -1,5 +1,6 @@
 import '../styles/globals.css';
 import { Inter, Fraunces, IBM_Plex_Mono } from 'next/font/google';
+import { Toaster } from 'sonner';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,6 +32,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${fraunces.variable} ${ibmPlexMono.variable} font-sans`}>
         {children}
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

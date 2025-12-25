@@ -4,23 +4,34 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
+import Underline from '@tiptap/extension-underline';
+import Strike from '@tiptap/extension-strike';
+import TextAlign from '@tiptap/extension-text-align';
+import TextStyle from '@tiptap/extension-text-style';
+import Color from '@tiptap/extension-color';
+import Image from '@tiptap/extension-image';
 import { useEffect } from 'react';
 import {
   Bold,
   Italic,
   Code,
-  Heading1,
-  Heading2,
-  Heading3,
   List,
   ListOrdered,
   Quote,
   Code2,
-  Link2,
   Minus,
   Undo,
   Redo,
+  Strikethrough,
+  Underline as UnderlineIcon,
 } from 'lucide-react';
+import { FloatingToolbar } from './FloatingToolbar';
+import { HeadingDropdown } from './HeadingDropdown';
+import { TextAlignButtons } from './TextAlignButtons';
+import { ColorPicker } from './ColorPicker';
+import { LinkPopover } from './LinkPopover';
+import { LinkButton } from './LinkButton';
+import { ImageUploadButton } from './ImageUploadButton';
 import './editor.css';
 
 interface TiptapEditorProps {
@@ -72,6 +83,7 @@ export function TiptapEditor({
             class: 'code-block',
           },
         },
+        strike: false, // Disable built-in strike to use our extension
       }),
       Link.configure({
         openOnClick: false,
@@ -82,6 +94,21 @@ export function TiptapEditor({
       Placeholder.configure({
         placeholder,
       }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right', 'justify'],
+      }),
+      TextStyle,
+      Color,
+      Image.configure({
+        inline: false,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-lg max-w-full h-auto',
+        },
+      }),
+      Underline,
+      Strike,
     ],
     content: content || '',
     editorProps: {
@@ -106,27 +133,22 @@ export function TiptapEditor({
     return null;
   }
 
-  const setLink = () => {
-    const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('Enter URL:', previousUrl);
-
-    if (url === null) {
-      return;
-    }
-
-    if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  };
-
   return (
     <div className="border border-border-1 rounded-lg bg-white shadow-md overflow-hidden">
+      {/* Floating Toolbar */}
+      <FloatingToolbar editor={editor} />
+
+      {/* Link Popover */}
+      <LinkPopover editor={editor} />
+
       {/* Toolbar */}
       <div className="border-b border-border-1 bg-surface-1 px-3 py-2">
         <div className="flex flex-wrap items-center gap-1">
+          {/* Heading Dropdown */}
+          <HeadingDropdown editor={editor} />
+
+          <ToolbarDivider />
+
           {/* Text formatting */}
           <div className="flex items-center gap-1">
             <ToolbarButton
@@ -144,6 +166,20 @@ export function TiptapEditor({
               <Italic className="w-4 h-4" />
             </ToolbarButton>
             <ToolbarButton
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              isActive={editor.isActive('underline')}
+              title="Underline (Ctrl+U)"
+            >
+              <UnderlineIcon className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              isActive={editor.isActive('strike')}
+              title="Strikethrough"
+            >
+              <Strikethrough className="w-4 h-4" />
+            </ToolbarButton>
+            <ToolbarButton
               onClick={() => editor.chain().focus().toggleCode().run()}
               isActive={editor.isActive('code')}
               title="Inline Code"
@@ -154,30 +190,13 @@ export function TiptapEditor({
 
           <ToolbarDivider />
 
-          {/* Headings */}
-          <div className="flex items-center gap-1">
-            <ToolbarButton
-              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-              isActive={editor.isActive('heading', { level: 1 })}
-              title="Heading 1"
-            >
-              <Heading1 className="w-4 h-4" />
-            </ToolbarButton>
-            <ToolbarButton
-              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              isActive={editor.isActive('heading', { level: 2 })}
-              title="Heading 2"
-            >
-              <Heading2 className="w-4 h-4" />
-            </ToolbarButton>
-            <ToolbarButton
-              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-              isActive={editor.isActive('heading', { level: 3 })}
-              title="Heading 3"
-            >
-              <Heading3 className="w-4 h-4" />
-            </ToolbarButton>
-          </div>
+          {/* Color Picker */}
+          <ColorPicker editor={editor} />
+
+          <ToolbarDivider />
+
+          {/* Text Alignment */}
+          <TextAlignButtons editor={editor} />
 
           <ToolbarDivider />
 
@@ -221,15 +240,10 @@ export function TiptapEditor({
 
           <ToolbarDivider />
 
-          {/* Link & HR */}
+          {/* Link & Image & HR */}
           <div className="flex items-center gap-1">
-            <ToolbarButton
-              onClick={setLink}
-              isActive={editor.isActive('link')}
-              title="Add/Edit Link"
-            >
-              <Link2 className="w-4 h-4" />
-            </ToolbarButton>
+            <LinkButton editor={editor} />
+            <ImageUploadButton editor={editor} />
             <ToolbarButton
               onClick={() => editor.chain().focus().setHorizontalRule().run()}
               title="Horizontal Rule"

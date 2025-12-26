@@ -1,13 +1,18 @@
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { paths, secret } = body;
+    const { paths, tags, secret } = body as {
+      paths?: unknown;
+      tags?: unknown;
+      secret?: unknown;
+    };
 
     // Validate secret token for security
-    const revalidateSecret = process.env.REVALIDATE_SECRET;
+    const revalidateSecret =
+      process.env.VERCEL_REVALIDATE_TOKEN || process.env.REVALIDATE_SECRET;
     if (!revalidateSecret) {
       return NextResponse.json(
         { error: 'Revalidation not configured' },
@@ -15,28 +20,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (secret !== revalidateSecret) {
+    const headerToken = request.headers.get('x-revalidate-token');
+    const provided = (typeof headerToken === 'string' && headerToken) || secret;
+
+    if (provided !== revalidateSecret) {
       return NextResponse.json(
         { error: 'Invalid revalidation secret' },
         { status: 401 }
       );
     }
 
-    if (!paths || !Array.isArray(paths)) {
+    const normalizedPaths = Array.isArray(paths) ? paths : [];
+    const normalizedTags = Array.isArray(tags) ? tags : [];
+
+    if (normalizedPaths.length === 0 && normalizedTags.length === 0) {
       return NextResponse.json(
-        { error: 'paths must be an array' },
+        { error: 'Provide at least one path or tag to revalidate' },
         { status: 400 }
       );
     }
 
+    // Revalidate tags (preferred for ISR fetch caching)
+    for (const tag of normalizedTags) {
+      if (typeof tag === 'string' && tag.length > 0) {
+        revalidateTag(tag);
+      }
+    }
+
     // Revalidate each path
-    for (const path of paths) {
-      revalidatePath(path);
+    for (const path of normalizedPaths) {
+      if (typeof path === 'string' && path.length > 0) {
+        revalidatePath(path);
+      }
     }
 
     return NextResponse.json({
       revalidated: true,
-      paths,
+      tags: normalizedTags,
+      paths: normalizedPaths,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

@@ -10,7 +10,10 @@ const DEFAULT_BLOG_SLUG =
 async function getRecentPosts() {
   try {
     const response = await fetchFromBaasAPI(
-      `/api/v1/public/blogs/${DEFAULT_BLOG_SLUG}/posts?per_page=10&sort=-published_at`
+      `/api/v1/public/blogs/${DEFAULT_BLOG_SLUG}/posts?per_page=10&sort=-published_at`,
+      {
+        next: { tags: [`posts:list:${DEFAULT_BLOG_SLUG}`], revalidate: 3600 },
+      }
     );
     return response as PostListResponse;
   } catch (error) {

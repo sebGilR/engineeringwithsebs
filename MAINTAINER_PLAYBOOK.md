@@ -53,7 +53,7 @@ Client page
   - `app/api/auth/*` — login/signup/refresh/logout (cookie management)
   - `app/api/posts/*` — CRUD + publish/unpublish
   - `app/api/blogs/*` — list/create/update/delete
-  - `app/api/revalidate/route.ts` — Next cache revalidation endpoint
+- `app/api/revalidate/route.ts` — Next cache revalidation endpoint (supports tag + path invalidation)
 
 ## Core primitive: calling the backend
 
@@ -156,9 +156,9 @@ If you add new extensions, keep the contract the same: output remains valid `con
 
 There is an internal endpoint:
 
-- `POST /api/revalidate` with `{ paths: string[], secret: string }`
+- `POST /api/revalidate` with `{ tags?: string[], paths?: string[] }`
 
-It uses Next’s `revalidatePath()` and is protected by `REVALIDATE_SECRET`.
+It uses Next’s `revalidateTag()` + `revalidatePath()` and is protected by `VERCEL_REVALIDATE_TOKEN` (or legacy `REVALIDATE_SECRET`).
 
 Helper functions:
 
@@ -259,7 +259,7 @@ Checklist:
 Checklist:
 
 - Ensure you’re calling `POST /api/revalidate` (or using `revalidatePostPaths`).
-- Confirm `REVALIDATE_SECRET` is set and matches the request body secret.
+- Confirm `VERCEL_REVALIDATE_TOKEN` (or legacy `REVALIDATE_SECRET`) is set and matches `X-Revalidate-Token`.
 
 ## Environment & local dev
 
@@ -267,8 +267,24 @@ See `.env.local.example` for the canonical set:
 
 - `NEXT_PUBLIC_SITE_URL`
 - `BAAS_API_URL`
-- `REVALIDATE_SECRET`
+- `VERCEL_REVALIDATE_TOKEN` (or legacy `REVALIDATE_SECRET`)
 - `NEXT_PUBLIC_BLOG_SLUG`
+
+### Deploy env var checklist
+
+**Vercel (Next.js project env vars):**
+- `BAAS_API_URL` (Fly Rails URL)
+- `NEXT_PUBLIC_SITE_URL` (e.g. `https://engineeringwithsebs.com`)
+- `NEXT_PUBLIC_BLOG_SLUG`
+- `VERCEL_REVALIDATE_TOKEN` (must match Fly)
+
+**Fly (Rails secrets/env vars):**
+- `RAILS_MASTER_KEY`
+- `DATABASE_URL` (DigitalOcean managed Postgres)
+- `REDIS_URL` (Upstash)
+- `CORS_ORIGINS` (comma-separated; include Vercel domains)
+- `VERCEL_REVALIDATE_URL` (e.g. `https://engineeringwithsebs.com/api/revalidate`)
+- `VERCEL_REVALIDATE_TOKEN` (must match Vercel)
 
 Common commands:
 

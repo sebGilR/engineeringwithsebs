@@ -12,6 +12,7 @@
 
 # Env files
 .env
+.env.local
 .env.*.local
 
 # Debug
@@ -23,4 +24,5 @@ pnpm-debug.log*
 # Editor
 .vscode
 *.swp
+*.tsbuildinfo
 .DS_Store

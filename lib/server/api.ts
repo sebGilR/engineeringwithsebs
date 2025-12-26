@@ -9,13 +9,18 @@ type FetchOptions = {
   headers?: Record<string, string>;
   body?: any;
   accessToken?: string;
+  cache?: RequestCache;
+  next?: {
+    tags?: string[];
+    revalidate?: number;
+  };
 };
 
 export async function fetchFromBaasAPI(
   path: string,
   options: FetchOptions = {}
 ) {
-  const { method = 'GET', headers = {}, body, accessToken } = options;
+  const { method = 'GET', headers = {}, body, accessToken, cache, next } = options;
 
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/vnd.api+json',
@@ -42,6 +47,8 @@ export async function fetchFromBaasAPI(
       ...headers,
     },
     body: requestBody,
+    cache,
+    next,
   });
 
   if (!response.ok) {

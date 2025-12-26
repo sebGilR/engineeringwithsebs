@@ -11,7 +11,13 @@ interface PageProps {
 async function getPublicPost(blogSlug: string, postSlug: string) {
   try {
     const response = await fetchFromBaasAPI(
-      `/api/v1/public/blogs/${blogSlug}/posts/${postSlug}`
+      `/api/v1/public/blogs/${blogSlug}/posts/${postSlug}`,
+      {
+        next: {
+          tags: [`post:${blogSlug}/${postSlug}`, `posts:list:${blogSlug}`],
+          revalidate: 86_400,
+        },
+      }
     );
     return response as PostResponse;
   } catch (error) {

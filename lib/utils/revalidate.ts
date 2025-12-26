@@ -3,10 +3,27 @@
  * Call this after publishing, unpublishing, or updating posts
  */
 export async function revalidatePaths(paths: string[]): Promise<boolean> {
+  return revalidate({ paths });
+}
+
+/**
+ * Triggers cache revalidation for tags and/or paths.
+ * Intended for ISR (`fetch(..., { next: { tags: [...] } })`) + path invalidation as a fallback.
+ */
+export async function revalidate({
+  tags = [],
+  paths = [],
+}: {
+  tags?: string[];
+  paths?: string[];
+}): Promise<boolean> {
   try {
-    const secret = process.env.REVALIDATE_SECRET;
-    if (!secret) {
-      console.warn('REVALIDATE_SECRET not configured, skipping revalidation');
+    const token =
+      process.env.VERCEL_REVALIDATE_TOKEN || process.env.REVALIDATE_SECRET;
+    if (!token) {
+      console.warn(
+        'VERCEL_REVALIDATE_TOKEN/REVALIDATE_SECRET not configured, skipping revalidation'
+      );
       return false;
     }
 
@@ -17,10 +34,11 @@ export async function revalidatePaths(paths: string[]): Promise<boolean> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Revalidate-Token': token,
       },
       body: JSON.stringify({
+        tags,
         paths,
-        secret,
       }),
     });
 
@@ -43,12 +61,8 @@ export async function revalidatePostPaths(
   blogSlug: string,
   postSlug: string
 ): Promise<boolean> {
-  const paths = [
-    '/', // Homepage
-    `/blog/${blogSlug}/${postSlug}`, // Post page
-    '/sitemap.xml', // Sitemap
-    '/rss.xml', // RSS feed
-  ];
+  const tags = [`posts:list:${blogSlug}`, `post:${blogSlug}/${postSlug}`];
+  const paths = ['/', `/blog/${blogSlug}/${postSlug}`, '/sitemap.xml', '/rss.xml'];
 
-  return revalidatePaths(paths);
+  return revalidate({ tags, paths });
 }

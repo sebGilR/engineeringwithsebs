@@ -3,7 +3,7 @@ import { fetchFromBaasAPI } from '@/lib/server/api';
 import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const refreshToken = cookieStore.get('refresh_token')?.value;
 
   if (!refreshToken) {

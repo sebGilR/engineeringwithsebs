@@ -3,6 +3,10 @@ import { cookies } from 'next/headers';
 import { fetchFromBaasAPI } from '@/lib/server/api';
 import type { BlogListResponse, CreateBlogPayload } from '@/lib/types/blog';
 
+// Disable caching for this API route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('access_token')?.value;

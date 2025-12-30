@@ -3,6 +3,10 @@ import { cookies } from 'next/headers';
 import { fetchFromBaasAPI } from '@/lib/server/api';
 import type { UpdatePostPayload } from '@/lib/types/post';
 
+// Disable caching for this API route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

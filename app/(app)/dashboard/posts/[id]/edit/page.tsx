@@ -35,7 +35,9 @@ export default function EditPostPage({
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/posts/${id}`);
+        const response = await fetch(`/api/posts/${id}`, {
+          cache: 'no-store',
+        });
 
         if (!response.ok) {
           if (response.status === 401) {

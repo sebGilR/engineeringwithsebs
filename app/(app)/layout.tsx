@@ -1,6 +1,10 @@
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { BlogProvider } from '@/lib/contexts/BlogContext';
 
+// Disable caching for all dashboard routes
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function AppLayout({
   children,
 }: {

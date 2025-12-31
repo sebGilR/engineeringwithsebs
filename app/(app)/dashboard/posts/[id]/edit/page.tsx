@@ -7,6 +7,9 @@ import { toast } from 'sonner';
 import type { Post, PostStatus } from '@/lib/types/post';
 import { TiptapEditor } from '@/components/editor/TiptapEditor';
 
+const DEFAULT_BLOG_SLUG =
+  process.env.NEXT_PUBLIC_BLOG_SLUG || 'engineeringwithsebs';
+
 export default function EditPostPage({
   params,
 }: {
@@ -249,6 +252,27 @@ export default function EditPostPage({
 
       setStatus('published');
       toast.success('Post published successfully');
+
+      // Trigger frontend-driven cache revalidation for public views
+      fetch('/api/dashboard/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({
+          tags: [
+            `posts:list:${DEFAULT_BLOG_SLUG}`,
+            `post:${DEFAULT_BLOG_SLUG}/${slug}`,
+          ],
+          paths: [
+            '/',
+            `/blog/${DEFAULT_BLOG_SLUG}/${slug}`,
+            '/sitemap.xml',
+            '/rss.xml',
+          ],
+        }),
+      }).catch((err) => {
+        console.error('Revalidation after publish failed:', err);
+      });
     } catch (err: any) {
       console.error('Error publishing post:', err);
       const errorMessage = err.message || 'Failed to publish post';
@@ -278,6 +302,27 @@ export default function EditPostPage({
 
       setStatus('draft');
       toast.success('Post unpublished successfully');
+
+      // Trigger cache revalidation so the post disappears from public lists
+      fetch('/api/dashboard/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({
+          tags: [
+            `posts:list:${DEFAULT_BLOG_SLUG}`,
+            `post:${DEFAULT_BLOG_SLUG}/${slug}`,
+          ],
+          paths: [
+            '/',
+            `/blog/${DEFAULT_BLOG_SLUG}/${slug}`,
+            '/sitemap.xml',
+            '/rss.xml',
+          ],
+        }),
+      }).catch((err) => {
+        console.error('Revalidation after unpublish failed:', err);
+      });
     } catch (err: any) {
       console.error('Error unpublishing post:', err);
       const errorMessage = err.message || 'Failed to unpublish post';
